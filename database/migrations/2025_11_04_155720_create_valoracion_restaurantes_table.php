@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('valoracion_restaurantes', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->foreignId('restaurante_id')
+                  ->constrained('Restaurantes')
+                  ->onDelete('cascade');
+
+            $table->integer('puntuacion');
+            $table->text('comentario')->nullable();
         });
     }
 

@@ -11,10 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('restaurantes', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+                Schema::create('restaurantes', function (Blueprint $table) {
+        $table->id();
+        $table->string('nombre');
+        $table->text('descripcion');
+        $table->string('direccion');
+        $table->unsignedBigInteger('tipo_de_comida_id');
+        $table->unsignedBigInteger('ciudad_id');
+        $table->string('imagen')->nullable();
+        $table->timestamps();
+});
     }
 
     /**
