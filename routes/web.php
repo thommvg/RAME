@@ -19,6 +19,7 @@ Route::get('/', function () {
 
 // Fíjate que el segundo parámetro sea 'store'
 Route::post('/dashboard/store', [DashboardController::class, 'store'])->name('dashboard.store');
+Route::post('/contacto', [DashboardController::class, 'contactoStore'])->name('contacto.store');
 
 
 Route::get('/dashboard', [DashboardController::class, 'index'])

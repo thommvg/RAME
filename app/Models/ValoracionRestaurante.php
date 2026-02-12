@@ -6,16 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class ValoracionRestaurante extends Model
 {
+    // 1. Aseguramos el nombre de la tabla (con guion bajo como sale en tu error)
     protected $table = 'valoracion_restaurantes'; 
 
     protected $fillable = [
-        'lugares_id', // FK a la tabla lugares
+        'restaurante_id',
         'puntuacion',
         'comentario'
     ];
 
-    public function lugar()
-    {
-        return $this->belongsTo(Lugar::class, 'lugares_id');
-    }
+    // 2. ESTO ES LO QUE ARREGLA EL ERROR ACTUAL
+    public $timestamps = false; 
 }

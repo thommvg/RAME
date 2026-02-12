@@ -58,21 +58,59 @@ const PlaceCard = ({ name, rating, imageUrl }) => {
 export default function Dashboard({ auth, lugares, restaurantes }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    // FORMULARIO 1: REGISTRO DE LUGARES/RESTAURANTES
+    const { 
+        data: lugarData, 
+        setData: setLugarData, 
+        post: postLugar, 
+        processing: processingLugar, 
+        errors: errorsLugar, 
+        reset: resetLugar 
+    } = useForm({
         tipo_entidad: 'lugar', 
         nombre: '',
-        descripcion: '',
         direccion: '',
-        ciudad_id: '',
-        tipo_de_turismo_id: '',
+        ciudad: '', 
+        comentario: '',
         puntuacion: 5,
-        comentario: ''
+        imagen: '',
+        tipo_de_turismo_id: '', 
     });
 
-    const handleSubmit = (e) => {
+    // FORMULARIO 2: CONTACTO
+    const { 
+        data: contactoData, 
+        setData: setContactoData, 
+        post: postContacto, 
+        processing: processingContacto, 
+        errors: errorsContacto, 
+        reset: resetContacto 
+    } = useForm({
+        nombre: '',
+        telefono: '',
+        correo: '',
+        mensaje: '',
+    });
+
+const handleLugarSubmit = (e) => {
         e.preventDefault();
-        post(route('dashboard.store'), {
-            onSuccess: () => { setIsModalOpen(false); reset(); }
+        postLugar(route('dashboard.store'), {
+            preserveScroll: true, // <--- Añade esto
+            onSuccess: () => { 
+                setIsModalOpen(false); 
+                resetLugar(); 
+            }
+        });
+    };
+
+    const handleContactoSubmit = (e) => {
+        e.preventDefault();
+        postContacto(route('contacto.store'), {
+            preserveScroll: true, // <--- Añade esto
+            onSuccess: () => {
+                resetContacto();
+                alert('¡Mensaje enviado con éxito!');
+            }
         });
     };
 
@@ -81,7 +119,7 @@ export default function Dashboard({ auth, lugares, restaurantes }) {
             <Head title="Inicio" />
             <HeroHeader />
 
-            {/* SECCIÓN LUGARES MEJOR PUNTUADOS */}
+            {/* SECCIÓN LUGARES */}
             <div className="bg-gray-900 py-12 border-t border-purple-800" id="Lugares">
                 <div className="max-w-7xl mx-auto">
                     <h3 className="text-3xl font-extrabold text-white text-center mb-10">Lugares mejor puntuados</h3>
@@ -105,118 +143,141 @@ export default function Dashboard({ auth, lugares, restaurantes }) {
                 </div>
             </div>
 
-            {/* SECCIÓN CONTACTO (RECUPERADA) */}
+            {/* SECCIÓN CONTACTO (noValidate para evitar burbujas HTML) */}
             <div className="bg-gray-900 py-16 border-t border-purple-800">
                 <div className="max-w-4xl mx-auto">
                     <h3 className="text-3xl font-extrabold text-white text-center mb-10">Contacto</h3>
-                    <div className="p-10">
+                    <form onSubmit={handleContactoSubmit} noValidate className="p-10">
                         <div className="grid md:grid-cols-3 gap-6 mb-6">
-                            <input type="text" placeholder="Nombre" className="w-full p-3 rounded bg-white text-black" />
-                            <input type="text" placeholder="Teléfono" className="w-full p-3 rounded bg-white text-black" />
-                            <input type="email" placeholder="Correo" className="w-full p-3 rounded bg-white text-black" />
+                            <div className="flex flex-col">
+                                <input 
+                                    type="text" placeholder="Nombre" 
+                                    value={contactoData.nombre} onChange={e => setContactoData('nombre', e.target.value)}
+                                    className={`w-full p-3 rounded bg-white text-black ${errorsContacto.nombre ? 'ring-2 ring-red-500' : ''}`} 
+                                />
+                                {errorsContacto.nombre && <span className="text-red-400 text-xs mt-1">{errorsContacto.nombre}</span>}
+                            </div>
+                            <div className="flex flex-col">
+                                <input 
+                                type="text" 
+                                inputMode="numeric" // Esto asegura que en el celular se abra el teclado de números
+                                placeholder="Teléfono" 
+                                value={contactoData.telefono} 
+                                onChange={e => {
+                                    const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
+                                        setContactoData('telefono', soloNumeros);}}
+                                            className={`w-full p-3 rounded bg-white text-black ${errorsContacto.telefono ? 'ring-2 ring-red-500' : ''}`} 
+/> 
+                                {errorsContacto.telefono && <span className="text-red-400 text-xs mt-1">{errorsContacto.telefono}</span>}
+                            </div>
+                            <div className="flex flex-col">
+                                <input 
+                                    type="email" placeholder="Correo" 
+                                    value={contactoData.correo} onChange={e => setContactoData('correo', e.target.value)}
+                                    className={`w-full p-3 rounded bg-white text-black ${errorsContacto.correo ? 'ring-2 ring-red-500' : ''}`} 
+                                />
+                                {errorsContacto.correo && <span className="text-red-400 text-xs mt-1">{errorsContacto.correo}</span>}
+                            </div>
                         </div>
-                        <textarea placeholder="Mensaje" className="w-full p-3 rounded bg-white text-black mb-6"></textarea>
+                        <textarea 
+                            placeholder="Mensaje" 
+                            value={contactoData.mensaje} onChange={e => setContactoData('mensaje', e.target.value)}
+                            className={`w-full p-3 rounded bg-white text-black mb-6 ${errorsContacto.mensaje ? 'ring-2 ring-red-500' : ''}`}
+                        ></textarea>
+                        {errorsContacto.mensaje && <p className="text-red-400 text-xs -mt-4 mb-4">{errorsContacto.mensaje}</p>}
+                        
                         <div className="text-center">
-                            <button className="px-6 py-2 bg-purple-800 text-white rounded hover:bg-purple-900">Enviar</button>
+                            <button type="submit" disabled={processingContacto} className="px-6 py-2 bg-purple-800 text-white rounded hover:bg-purple-900 transition shadow-lg">
+                                {processingContacto ? 'Enviando...' : 'Enviar Mensaje'}
+                            </button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
-            {/* BOTÓN FLOTANTE PÚRPURA */}
+            {/* BOTÓN FLOTANTE */}
             <button
-                onClick={() => setIsModalOpen(true)}
-                className="fixed bottom-10 left-10 w-16 h-16 bg-purple-600 hover:bg-purple-500 text-white rounded-full shadow-2xl flex items-center justify-center text-4xl z-50 transition-all hover:scale-110 active:scale-95 border-2 border-purple-400"
+                onClick={() => { resetLugar(); setIsModalOpen(true); }}
+                className="fixed bottom-10 left-10 w-16 h-16 bg-purple-600 hover:bg-purple-500 text-white rounded-full shadow-2xl flex items-center justify-center text-4xl z-50 transition-all border-2 border-purple-400"
             >
                 +
             </button>
 
-            {/* MODAL INTEGRADO CORRECTAMENTE */}
-            {/* MODAL DINÁMICO MEJORADO */}
-{isModalOpen && (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div className="bg-gray-900 border border-purple-500/30 w-full max-w-lg rounded-2xl p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <div className="flex justify-between items-center mb-6 text-white">
-                <h2 className="text-2xl font-bold">Nuevo Registro</h2>
-                <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white text-3xl">&times;</button>
-            </div>
+            {/* MODAL REGISTRO (noValidate añadido) */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+                    <div className="bg-gray-900 border border-purple-500/30 w-full max-w-lg rounded-2xl p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
+                        <div className="flex justify-between items-center mb-6 text-white">
+                            <h2 className="text-2xl font-bold">Nuevo Registro</h2>
+                            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white text-3xl">&times;</button>
+                        </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 text-white">
-                {/* Selector Tipo de Entidad */}
-                <div className="flex bg-gray-800 p-1 rounded-xl mb-2">
-                    <button type="button" onClick={() => setData('tipo_entidad', 'lugar')} 
-                        className={`flex-1 py-2 rounded-lg font-bold transition ${data.tipo_entidad === 'lugar' ? 'bg-purple-600 text-white' : 'text-gray-400'}`}>📍 Lugar</button>
-                    <button type="button" onClick={() => setData('tipo_entidad', 'restaurante')} 
-                        className={`flex-1 py-2 rounded-lg font-bold transition ${data.tipo_entidad === 'restaurante' ? 'bg-purple-600 text-white' : 'text-gray-400'}`}>🍴 Restaurante</button>
+                        <form onSubmit={handleLugarSubmit} noValidate className="space-y-4 text-white">
+                            <div className="flex bg-gray-800 p-1 rounded-xl mb-2">
+                                <button type="button" onClick={() => setLugarData('tipo_entidad', 'lugar')} 
+                                    className={`flex-1 py-2 rounded-lg font-bold transition ${lugarData.tipo_entidad === 'lugar' ? 'bg-purple-600 text-white' : 'text-gray-400'}`}>📍 Lugar</button>
+                                <button type="button" onClick={() => setLugarData('tipo_entidad', 'restaurante')} 
+                                    className={`flex-1 py-2 rounded-lg font-bold transition ${lugarData.tipo_entidad === 'restaurante' ? 'bg-purple-600 text-white' : 'text-gray-400'}`}>🍴 Restaurante</button>
+                            </div>
+
+                            <div className="flex flex-col">
+                                <input type="text" placeholder="Nombre" value={lugarData.nombre} onChange={e => setLugarData('nombre', e.target.value)} 
+                                    className={`w-full bg-gray-800 border-gray-700 rounded-lg text-white ${errorsLugar.nombre ? 'ring-2 ring-red-500' : ''}`} />
+                                {errorsLugar.nombre && <span className="text-red-400 text-xs mt-1">{errorsLugar.nombre}</span>}
+                            </div>
+                            
+                            <div className="flex flex-col">
+                                <input type="text" placeholder="Dirección" value={lugarData.direccion} onChange={e => setLugarData('direccion', e.target.value)} 
+                                    className={`w-full bg-gray-800 border-gray-700 rounded-lg text-white ${errorsLugar.direccion ? 'ring-2 ring-red-500' : ''}`} />
+                                {errorsLugar.direccion && <span className="text-red-400 text-xs mt-1">{errorsLugar.direccion}</span>}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="flex flex-col">
+                                    <select value={lugarData.ciudad} onChange={e => setLugarData('ciudad', e.target.value)} className={`bg-gray-800 border-gray-700 rounded-lg text-white ${errorsLugar.ciudad ? 'ring-2 ring-red-500' : ''}`}>
+                                        <option value="">Ciudad</option>
+                                        <option value="Medellín">Medellín</option>
+                                        <option value="Envigado">Envigado</option>
+                                        <option value="Itagüí">Itagüí</option>
+                                        <option value="Sabaneta">Sabaneta</option>
+                                        <option value="Bello">Bello</option>
+                                    </select>
+                                    {errorsLugar.ciudad && <span className="text-red-400 text-xs mt-1">{errorsLugar.ciudad}</span>}
+                                </div>
+
+                                <select value={lugarData.tipo_de_turismo_id} onChange={e => setLugarData('tipo_de_turismo_id', e.target.value)} className="bg-gray-800 border-gray-700 rounded-lg text-white">
+                                    <option value="">Categoría</option>
+                                    {lugarData.tipo_entidad === 'lugar' ? (
+                                        <><option value="2">Naturaleza</option><option value="3">Cultura</option></>
+                                    ) : (
+                                        <><option value="1">Típica</option><option value="2">Internacional</option></>
+                                    )}
+                                </select>
+                            </div>
+
+                            <div className="p-4 bg-gray-800/50 rounded-xl">
+                                <select value={lugarData.puntuacion} onChange={e => setLugarData('puntuacion', e.target.value)} className="w-full bg-gray-700 border-none rounded-lg text-white mb-3">
+                                    <option value="5">⭐⭐⭐⭐⭐</option>
+                                    <option value="4">⭐⭐⭐⭐</option>
+                                    <option value="3">⭐⭐⭐</option>
+                                </select>
+                                <textarea placeholder="Comentario..." value={lugarData.comentario} onChange={e => setLugarData('comentario', e.target.value)} className={`w-full bg-gray-700 border-none rounded-lg text-white text-sm h-20 ${errorsLugar.comentario ? 'ring-2 ring-red-500' : ''}`}></textarea>
+                                {errorsLugar.comentario && <span className="text-red-400 text-xs mt-1">{errorsLugar.comentario}</span>}
+                            </div>
+
+                            <div className="flex flex-col">
+                                <input type="text" placeholder="URL Imagen" value={lugarData.imagen} onChange={e => setLugarData('imagen', e.target.value)} 
+                                    className={`w-full bg-gray-800 border-gray-700 rounded-lg text-white text-sm ${errorsLugar.imagen ? 'ring-2 ring-red-500' : ''}`} />
+                                {errorsLugar.imagen && <span className="text-red-400 text-xs mt-1">{errorsLugar.imagen}</span>}
+                            </div>
+
+                            <button type="submit" disabled={processingLugar} className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-lg">
+                                {processingLugar ? 'GUARDANDO...' : 'GUARDAR AHORA'}
+                            </button>
+                        </form>
+                    </div>
                 </div>
-
-                {/* Nombre y Dirección */}
-                <div className="space-y-3">
-                    <input type="text" placeholder="Nombre del sitio" value={data.nombre} onChange={e => setData('nombre', e.target.value)} 
-                        className="w-full bg-gray-800 border-gray-700 rounded-lg text-white focus:ring-purple-500" />
-                    
-                    <input type="text" placeholder="Dirección exacta" value={data.direccion} onChange={e => setData('direccion', e.target.value)} 
-                        className="w-full bg-gray-800 border-gray-700 rounded-lg text-white focus:ring-purple-500" />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    {/* Ciudad */}
-                    <select value={data.ciudad_id} onChange={e => setData('ciudad_id', e.target.value)} 
-                        className="bg-gray-800 border-gray-700 rounded-lg text-white">
-                        <option value="">Ciudad</option>
-                        <option value="1">Medellín</option><option value="2">Envigado</option>
-                        <option value="3">Itagüí</option><option value="4">Sabaneta</option>
-                        <option value="5">Bello</option><option value="6">La Estrella</option>
-                        <option value="7">Caldas</option><option value="8">Copacabana</option>
-                        <option value="9">Girardota</option><option value="10">Barbosa</option>
-                    </select>
-
-                    {/* CATEGORÍAS DINÁMICAS */}
-                    <select value={data.tipo_de_turismo_id} onChange={e => setData('tipo_de_turismo_id', e.target.value)} 
-                        className="bg-gray-800 border-gray-700 rounded-lg text-white">
-                        <option value="">Categoría</option>
-                        {data.tipo_entidad === 'lugar' ? (
-                            <>
-                                <option value="2">Naturaleza</option>
-                                <option value="3">Cultura / Historia</option>
-                                <option value="4">Aventura / Deporte</option>
-                                <option value="5">Religioso</option>
-                            </>
-                        ) : (
-                            <>
-                                <option value="1">Comida Típica</option>
-                                <option value="2">Internacional</option>
-                                <option value="3">Parrilla / Carnes</option>
-                                <option value="4">Comida Rápida</option>
-                                <option value="5">Gourmet</option>
-                            </>
-                        )}
-                    </select>
-                </div>
-
-                {/* VALORACIÓN AMPLIADA */}
-                <div className="p-4 bg-gray-800/50 rounded-xl border border-purple-500/20">
-                    <label className="text-purple-400 text-xs font-bold block mb-2 uppercase">Tu experiencia</label>
-                    <select value={data.puntuacion} onChange={e => setData('puntuacion', e.target.value)} 
-                        className="w-full bg-gray-700 border-none rounded-lg text-white mb-3">
-                        <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
-                        <option value="4">⭐⭐⭐⭐ (Muy Bueno)</option>
-                        <option value="3">⭐⭐⭐ (Bueno)</option>
-                        <option value="2">⭐⭐ (Regular)</option>
-                        <option value="1">⭐ (Malo)</option>
-                    </select>
-                    <textarea placeholder="Cuéntanos más detalles..." value={data.comentario} onChange={e => setData('comentario', e.target.value)} 
-                        className="w-full bg-gray-700 border-none rounded-lg text-sm h-20 text-white placeholder-gray-500"></textarea>
-                </div>
-
-                <button type="submit" disabled={processing} className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-lg transition-all transform active:scale-95">
-                    {processing ? 'PROCESANDO...' : 'GUARDAR AHORA'}
-                </button>
-            </form>
-        </div>
-    </div>
-)}
-
+            )}
         </AuthenticatedLayout>
     );
 }

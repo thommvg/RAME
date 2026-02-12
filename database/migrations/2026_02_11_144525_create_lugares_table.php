@@ -17,7 +17,7 @@ return new class extends Migration
         $table->text('descripcion');
         $table->string('direccion');
         $table->unsignedBigInteger('tipo_de_turismo_id');
-        $table->unsignedBigInteger('ciudad_id');
+        $table->string('ciudad', 100)->nullable(); // Texto simple en lugar de ID
         $table->string('imagen')->nullable();
         $table->timestamps();
         });

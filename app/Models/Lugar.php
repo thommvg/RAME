@@ -15,7 +15,7 @@ class Lugar extends Model
         'descripcion',
         'direccion',
         'tipo_de_turismo_id',
-        'ciudad_id',
+        'ciudad',
         'imagen'
     ];
 

@@ -17,7 +17,7 @@ return new class extends Migration
         $table->text('descripcion');
         $table->string('direccion');
         $table->unsignedBigInteger('tipo_de_comida_id');
-        $table->unsignedBigInteger('ciudad_id');
+        $table->string('ciudad', 100)->nullable();
         $table->string('imagen')->nullable();
         $table->timestamps();
 });

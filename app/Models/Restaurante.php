@@ -13,16 +13,17 @@ class Restaurante extends Model
         'descripcion',
         'imagen',
         'direccion',
-        'ciudad_id'
+        'ciudad',
+        // ESTA ES LA LÍNEA QUE TE FALTA PARA QUE FUNCIONE:
+        'tipo_de_comida_id' 
     ];
 
-    // --- AÑADE ESTA LÍNEA ---
-    // Esto evita el error de las columnas de tiempo que no existen en tu tabla
+    // Esto está perfecto, evita errores si tu tabla no tiene created_at/updated_at
     public $timestamps = false; 
 
     public function valoraciones()
     {
-        // Asegúrate de que el nombre de la clase sea exacto
+        // Usamos el nombre en singular que confirmamos en tu explorador
         return $this->hasMany(ValoracionRestaurante::class, 'restaurante_id');
     }
 }
