@@ -7,15 +7,20 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
-        $lugares = Lugar::with('valoraciones')->where('tipo_de_turismo_id', '!=', 1)->get();
+public function index()
+{
+    // Calculamos el promedio de la columna 'puntuacion' de la relación 'valoraciones'
+    $lugares = Lugar::withAvg('valoraciones', 'puntuacion')
+                    ->where('tipo_de_turismo_id', '!=', 1)
+                    ->orderByDesc('valoraciones_avg_puntuacion')
+                    ->take(3)
+                    ->get();
 
-        $restaurantes = Lugar::with('valoraciones')->where('tipo_de_turismo_id', 1)->get();
 
-        return Inertia::render('Dashboard', [
-            'lugares' => $lugares,
-            'restaurantes' => $restaurantes,
-        ]);
-    }
+
+    return Inertia::render('Dashboard', [
+        'lugares' => $lugares,
+
+    ]);
+}
 }
