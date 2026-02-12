@@ -16,8 +16,13 @@ class Restaurante extends Model
         'ciudad_id'
     ];
 
+    // --- AÑADE ESTA LÍNEA ---
+    // Esto evita el error de las columnas de tiempo que no existen en tu tabla
+    public $timestamps = false; 
+
     public function valoraciones()
     {
-        return $this->hasMany(ValoracionRestaurante::class);
+        // Asegúrate de que el nombre de la clase sea exacto
+        return $this->hasMany(ValoracionRestaurante::class, 'restaurante_id');
     }
 }
