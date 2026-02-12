@@ -57,6 +57,7 @@ const PlaceCard = ({ name, rating, imageUrl }) => {
 // --- 3. DASHBOARD PRINCIPAL ---
 export default function Dashboard({ auth, lugares, restaurantes }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false); // Estado para el aviso de éxito
 
     // FORMULARIO 1: REGISTRO DE LUGARES/RESTAURANTES
     const { 
@@ -92,10 +93,10 @@ export default function Dashboard({ auth, lugares, restaurantes }) {
         mensaje: '',
     });
 
-const handleLugarSubmit = (e) => {
+    const handleLugarSubmit = (e) => {
         e.preventDefault();
         postLugar(route('dashboard.store'), {
-            preserveScroll: true, // <--- Añade esto
+            preserveScroll: true,
             onSuccess: () => { 
                 setIsModalOpen(false); 
                 resetLugar(); 
@@ -106,10 +107,11 @@ const handleLugarSubmit = (e) => {
     const handleContactoSubmit = (e) => {
         e.preventDefault();
         postContacto(route('contacto.store'), {
-            preserveScroll: true, // <--- Añade esto
+            preserveScroll: true,
             onSuccess: () => {
                 resetContacto();
-                alert('¡Mensaje enviado con éxito!');
+                setShowSuccessMessage(true); // Mostrar mensaje de éxito
+                setTimeout(() => setShowSuccessMessage(false), 5000); // Quitarlo a los 5 segundos
             }
         });
     };
@@ -143,12 +145,14 @@ const handleLugarSubmit = (e) => {
                 </div>
             </div>
 
-            {/* SECCIÓN CONTACTO (noValidate para evitar burbujas HTML) */}
+            {/* SECCIÓN CONTACTO */}
             <div className="bg-gray-900 py-16 border-t border-purple-800">
                 <div className="max-w-4xl mx-auto">
                     <h3 className="text-3xl font-extrabold text-white text-center mb-10">Contacto</h3>
+                    
                     <form onSubmit={handleContactoSubmit} noValidate className="p-10">
                         <div className="grid md:grid-cols-3 gap-6 mb-6">
+                            {/* Nombre */}
                             <div className="flex flex-col">
                                 <input 
                                     type="text" placeholder="Nombre" 
@@ -157,35 +161,46 @@ const handleLugarSubmit = (e) => {
                                 />
                                 {errorsContacto.nombre && <span className="text-red-400 text-xs mt-1">{errorsContacto.nombre}</span>}
                             </div>
+
+                            {/* Teléfono (Solo números) */}
                             <div className="flex flex-col">
                                 <input 
-                                type="text" 
-                                inputMode="numeric" // Esto asegura que en el celular se abra el teclado de números
-                                placeholder="Teléfono" 
-                                value={contactoData.telefono} 
-                                onChange={e => {
-                                    const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
-                                        setContactoData('telefono', soloNumeros);}}
-                                            className={`w-full p-3 rounded bg-white text-black ${errorsContacto.telefono ? 'ring-2 ring-red-500' : ''}`} 
-/> 
+                                    type="text" inputMode="numeric" placeholder="Teléfono" 
+                                    value={contactoData.telefono} 
+                                    onChange={e => setContactoData('telefono', e.target.value.replace(/[^0-9]/g, ''))}
+                                    className={`w-full p-3 rounded bg-white text-black ${errorsContacto.telefono ? 'ring-2 ring-red-500' : ''}`} 
+                                />
                                 {errorsContacto.telefono && <span className="text-red-400 text-xs mt-1">{errorsContacto.telefono}</span>}
                             </div>
+
+                            {/* Correo (type="text" para evitar burbujas HTML) */}
                             <div className="flex flex-col">
                                 <input 
-                                    type="email" placeholder="Correo" 
+                                    type="text" placeholder="Correo" 
                                     value={contactoData.correo} onChange={e => setContactoData('correo', e.target.value)}
                                     className={`w-full p-3 rounded bg-white text-black ${errorsContacto.correo ? 'ring-2 ring-red-500' : ''}`} 
                                 />
                                 {errorsContacto.correo && <span className="text-red-400 text-xs mt-1">{errorsContacto.correo}</span>}
                             </div>
                         </div>
-                        <textarea 
-                            placeholder="Mensaje" 
-                            value={contactoData.mensaje} onChange={e => setContactoData('mensaje', e.target.value)}
-                            className={`w-full p-3 rounded bg-white text-black mb-6 ${errorsContacto.mensaje ? 'ring-2 ring-red-500' : ''}`}
-                        ></textarea>
-                        {errorsContacto.mensaje && <p className="text-red-400 text-xs -mt-4 mb-4">{errorsContacto.mensaje}</p>}
+
+                        {/* Mensaje */}
+                        <div className="flex flex-col">
+                            <textarea 
+                                placeholder="Mensaje" 
+                                value={contactoData.mensaje} onChange={e => setContactoData('mensaje', e.target.value)}
+                                className={`w-full p-3 rounded bg-white text-black mb-6 ${errorsContacto.mensaje ? 'ring-2 ring-red-500' : ''}`}
+                            ></textarea>
+                            {errorsContacto.mensaje && <p className="text-red-400 text-xs -mt-4 mb-4">{errorsContacto.mensaje}</p>}
+                        </div>
                         
+                        {/* Mensaje de éxito visual */}
+                        {showSuccessMessage && (
+                            <div className="mb-6 p-4 bg-purple-600/20 border border-purple-500 text-purple-200 rounded-lg text-center animate-pulse">
+                                ¡Gracias! Tu mensaje ha sido enviado correctamente. ✨
+                            </div>
+                        )}
+
                         <div className="text-center">
                             <button type="submit" disabled={processingContacto} className="px-6 py-2 bg-purple-800 text-white rounded hover:bg-purple-900 transition shadow-lg">
                                 {processingContacto ? 'Enviando...' : 'Enviar Mensaje'}
@@ -203,7 +218,7 @@ const handleLugarSubmit = (e) => {
                 +
             </button>
 
-            {/* MODAL REGISTRO (noValidate añadido) */}
+            {/* MODAL REGISTRO */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
                     <div className="bg-gray-900 border border-purple-500/30 w-full max-w-lg rounded-2xl p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
