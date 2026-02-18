@@ -30,9 +30,4 @@ class Lugar extends Model
         return $this->hasMany(ValoracionLugar::class, 'lugares_id');
     }
 
-    // Relación con ciudad
-    public function ciudad()
-    {
-        return $this->belongsTo(Ciudad::class, 'ciudad_id');
-    }
 }

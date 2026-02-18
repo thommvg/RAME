@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Valoracion_lugares;
+use App\Models\Lugar; // Importamos el modelo Lugar para que no de error
 use Illuminate\Http\Request;
 
 class ValoracionLugaresController extends Controller
@@ -28,7 +29,18 @@ class ValoracionLugaresController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'ciudad' => 'required|string|max:255',
+            'imagen' => 'required|string', 
+            'puntuacion' => 'required|numeric|min:1|max:5', // Ahora acepta desde 1 estrella
+        ]);
+
+        // Guardamos en la tabla lugares
+        Lugar::create($validated); 
+
+        // Enviamos el mensaje de éxito a la sesión
+        return redirect()->back()->with('success', '¡Excelente! El lugar se ha guardado correctamente en Rame.');
     }
 
     /**

@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
-import React, { useState } from 'react';
+import { Head, useForm, usePage, Link } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
 
 // --- 1. COMPONENTE HERO ---
 function HeroHeader() {
@@ -15,17 +15,17 @@ function HeroHeader() {
             ></div>
             <div className="relative max-w-7xl mx-auto px-4 py-16 sm:py-24 lg:py-32 flex items-center h-96">
                 <div className="max-w-2xl">
-                    <h2 className="text-3xl font-extrabold text-purple-200 sm:text-4xl">
+                    <h2 className="text-3xl font-extrabold text-purple-200 sm:text-4xl italic">
                         Descubre hermosos lugares del valle de aburra
                     </h2>
                     <p className="mt-4 text-lg text-purple-300">
                         Encuentra las joyas escondidas y los restaurantes mejor valorados
                     </p>
-                    <div className="mt-8">
-                        <a href="#Lugares" className="inline-flex items-center justify-center px-5 py-3 rounded-md text-purple-900 bg-white hover:bg-gray-200 shadow-lg">
-                            Explorar Lugares
-                        </a>
-                    </div>
+                    <Link 
+                        href={route('explorar')} 
+                        className="mt-6 inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full transition shadow-lg">
+                        Explorar más lugares
+                    </Link>
                 </div>
             </div>
         </div>
@@ -56,41 +56,42 @@ const PlaceCard = ({ name, rating, imageUrl }) => {
 
 // --- 3. DASHBOARD PRINCIPAL ---
 export default function Dashboard({ auth, lugares, restaurantes }) {
+    const { flash } = usePage().props; 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [showSuccessMessage, setShowSuccessMessage] = useState(false); // Estado para el aviso de éxito
+    const [showToast, setShowToast] = useState(false); 
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-    // FORMULARIO 1: REGISTRO DE LUGARES/RESTAURANTES
+    // Efecto para el mensaje Toast del sistema
+    useEffect(() => {
+        if (flash.success) {
+            setShowToast(true);
+            const timer = setTimeout(() => setShowToast(false), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [flash.success]);
+
+    // FORMULARIO PARA REGISTRO DE LUGARES (MODAL)
     const { 
-        data: lugarData, 
-        setData: setLugarData, 
-        post: postLugar, 
-        processing: processingLugar, 
-        errors: errorsLugar, 
-        reset: resetLugar 
+        data: lugarData, setData: setLugarData, post: postLugar, 
+        processing: processingLugar, reset: resetLugar 
     } = useForm({
-        tipo_entidad: 'lugar', 
-        nombre: '',
-        direccion: '',
-        ciudad: '', 
-        comentario: '',
-        puntuacion: 5,
-        imagen: '',
-        tipo_de_turismo_id: '', 
+        tipo_entidad: 'lugar', nombre: '', direccion: '', ciudad: '', 
+        comentario: '', puntuacion: 5, imagen: '', tipo_de_turismo_id: '', 
     });
 
-    // FORMULARIO 2: CONTACTO
+    // FORMULARIO DE CONTACTO (TABLA CONTACTOS) CON VALIDACIÓN
     const { 
         data: contactoData, 
         setData: setContactoData, 
         post: postContacto, 
         processing: processingContacto, 
-        errors: errorsContacto, 
-        reset: resetContacto 
+        reset: resetContacto,
+        errors: errorsContacto 
     } = useForm({
         nombre: '',
         telefono: '',
         correo: '',
-        mensaje: '',
+        mensaje: ''
     });
 
     const handleLugarSubmit = (e) => {
@@ -106,25 +107,39 @@ export default function Dashboard({ auth, lugares, restaurantes }) {
 
     const handleContactoSubmit = (e) => {
         e.preventDefault();
-        postContacto(route('contacto.store'), {
+        postContacto(route('contactos.store'), {
             preserveScroll: true,
             onSuccess: () => {
                 resetContacto();
-                setShowSuccessMessage(true); // Mostrar mensaje de éxito
-                setTimeout(() => setShowSuccessMessage(false), 5000); // Quitarlo a los 5 segundos
-            }
+                setShowSuccessMessage(true);
+                setTimeout(() => setShowSuccessMessage(false), 5000);
+            },
         });
     };
 
     return (
         <AuthenticatedLayout user={auth.user} header={null}>
             <Head title="Inicio" />
+
+            {/* TOAST DE ÉXITO GENERAL */}
+            {showToast && (
+                <div className="fixed top-20 right-5 z-[100] animate-bounce">
+                    <div className="bg-purple-600 text-white px-6 py-4 rounded-2xl shadow-2xl border-2 border-purple-400 flex items-center space-x-3">
+                        <span className="text-2xl">✨</span>
+                        <div>
+                            <p className="font-black uppercase tracking-tighter text-xs">Sistema Rame</p>
+                            <p className="text-sm font-medium">{flash.success}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <HeroHeader />
 
             {/* SECCIÓN LUGARES */}
             <div className="bg-gray-900 py-12 border-t border-purple-800" id="Lugares">
-                <div className="max-w-7xl mx-auto">
-                    <h3 className="text-3xl font-extrabold text-white text-center mb-10">Lugares mejor puntuados</h3>
+                <div className="max-w-7xl mx-auto px-4">
+                    <h3 className="text-3xl font-extrabold text-white text-center mb-10 italic uppercase">Lugares mejor puntuados</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {lugares?.map((place) => (
                             <PlaceCard key={place.id} name={place.nombre} rating={place.valoraciones_avg_puntuacion} imageUrl={place.imagen} />
@@ -135,8 +150,8 @@ export default function Dashboard({ auth, lugares, restaurantes }) {
 
             {/* SECCIÓN RESTAURANTES */}
             <div className="bg-gray-900 py-20 border-t border-purple-800" id="Restaurantes">
-                <div className="max-w-7xl mx-auto">
-                    <h3 className="text-3xl font-extrabold text-white text-center mb-10">Restaurantes más buscados</h3>
+                <div className="max-w-7xl mx-auto px-4">
+                    <h3 className="text-3xl font-extrabold text-white text-center mb-10 italic uppercase">Restaurantes más buscados</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {restaurantes?.map((rest) => (
                             <PlaceCard key={rest.id} name={rest.nombre} rating={rest.valoraciones_avg_puntuacion} imageUrl={rest.imagen} />
@@ -210,10 +225,10 @@ export default function Dashboard({ auth, lugares, restaurantes }) {
                 </div>
             </div>
 
-            {/* BOTÓN FLOTANTE */}
+            {/* BOTÓN FLOTANTE (+) */}
             <button
                 onClick={() => { resetLugar(); setIsModalOpen(true); }}
-                className="fixed bottom-10 left-10 w-16 h-16 bg-purple-600 hover:bg-purple-500 text-white rounded-full shadow-2xl flex items-center justify-center text-4xl z-50 transition-all border-2 border-purple-400"
+                className="fixed bottom-10 left-10 w-16 h-16 bg-purple-600 hover:bg-purple-500 text-white rounded-full shadow-2xl flex items-center justify-center text-4xl z-50 transition-all border-2 border-purple-400 hover:rotate-90 duration-300 font-bold"
             >
                 +
             </button>
@@ -221,9 +236,9 @@ export default function Dashboard({ auth, lugares, restaurantes }) {
             {/* MODAL REGISTRO */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-                    <div className="bg-gray-900 border border-purple-500/30 w-full max-w-lg rounded-2xl p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
+                    <div className="bg-gray-900 border border-purple-500/30 w-full max-w-lg rounded-[2rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
                         <div className="flex justify-between items-center mb-6 text-white">
-                            <h2 className="text-2xl font-bold">Nuevo Registro</h2>
+                            <h2 className="text-2xl font-black italic uppercase tracking-tighter">Nuevo Registro</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white text-3xl">&times;</button>
                         </div>
 
@@ -235,32 +250,23 @@ export default function Dashboard({ auth, lugares, restaurantes }) {
                                     className={`flex-1 py-2 rounded-lg font-bold transition ${lugarData.tipo_entidad === 'restaurante' ? 'bg-purple-600 text-white' : 'text-gray-400'}`}>🍴 Restaurante</button>
                             </div>
 
-                            <div className="flex flex-col">
-                                <input type="text" placeholder="Nombre" value={lugarData.nombre} onChange={e => setLugarData('nombre', e.target.value)} 
-                                    className={`w-full bg-gray-800 border-gray-700 rounded-lg text-white ${errorsLugar.nombre ? 'ring-2 ring-red-500' : ''}`} />
-                                {errorsLugar.nombre && <span className="text-red-400 text-xs mt-1">{errorsLugar.nombre}</span>}
-                            </div>
+                            <input type="text" placeholder="Nombre" value={lugarData.nombre} onChange={e => setLugarData('nombre', e.target.value)} 
+                                className="w-full bg-gray-800 border-gray-700 rounded-lg text-white p-3" />
                             
-                            <div className="flex flex-col">
-                                <input type="text" placeholder="Dirección" value={lugarData.direccion} onChange={e => setLugarData('direccion', e.target.value)} 
-                                    className={`w-full bg-gray-800 border-gray-700 rounded-lg text-white ${errorsLugar.direccion ? 'ring-2 ring-red-500' : ''}`} />
-                                {errorsLugar.direccion && <span className="text-red-400 text-xs mt-1">{errorsLugar.direccion}</span>}
-                            </div>
+                            <input type="text" placeholder="Dirección" value={lugarData.direccion} onChange={e => setLugarData('direccion', e.target.value)} 
+                                className="w-full bg-gray-800 border-gray-700 rounded-lg text-white p-3" />
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="flex flex-col">
-                                    <select value={lugarData.ciudad} onChange={e => setLugarData('ciudad', e.target.value)} className={`bg-gray-800 border-gray-700 rounded-lg text-white ${errorsLugar.ciudad ? 'ring-2 ring-red-500' : ''}`}>
-                                        <option value="">Ciudad</option>
-                                        <option value="Medellín">Medellín</option>
-                                        <option value="Envigado">Envigado</option>
-                                        <option value="Itagüí">Itagüí</option>
-                                        <option value="Sabaneta">Sabaneta</option>
-                                        <option value="Bello">Bello</option>
-                                    </select>
-                                    {errorsLugar.ciudad && <span className="text-red-400 text-xs mt-1">{errorsLugar.ciudad}</span>}
-                                </div>
+                                <select value={lugarData.ciudad} onChange={e => setLugarData('ciudad', e.target.value)} className="bg-gray-800 border-gray-700 rounded-lg text-white p-3">
+                                    <option value="">Municipio</option>
+                                    <option value="Medellín">Medellín</option>
+                                    <option value="Envigado">Envigado</option>
+                                    <option value="Itagüí">Itagüí</option>
+                                    <option value="Sabaneta">Sabaneta</option>
+                                    <option value="Bello">Bello</option>
+                                </select>
 
-                                <select value={lugarData.tipo_de_turismo_id} onChange={e => setLugarData('tipo_de_turismo_id', e.target.value)} className="bg-gray-800 border-gray-700 rounded-lg text-white">
+                                <select value={lugarData.tipo_de_turismo_id} onChange={e => setLugarData('tipo_de_turismo_id', e.target.value)} className="bg-gray-800 border-gray-700 rounded-lg text-white p-3">
                                     <option value="">Categoría</option>
                                     {lugarData.tipo_entidad === 'lugar' ? (
                                         <><option value="2">Naturaleza</option><option value="3">Cultura</option></>
@@ -270,24 +276,27 @@ export default function Dashboard({ auth, lugares, restaurantes }) {
                                 </select>
                             </div>
 
-                            <div className="p-4 bg-gray-800/50 rounded-xl">
-                                <select value={lugarData.puntuacion} onChange={e => setLugarData('puntuacion', e.target.value)} className="w-full bg-gray-700 border-none rounded-lg text-white mb-3">
-                                    <option value="5">⭐⭐⭐⭐⭐</option>
-                                    <option value="4">⭐⭐⭐⭐</option>
-                                    <option value="3">⭐⭐⭐</option>
+                            <div className="p-4 bg-gray-800/50 rounded-xl border border-purple-500/20">
+                                <label className="block text-xs font-bold text-purple-400 mb-2 uppercase">Calificación inicial</label>
+                                <select 
+                                    value={lugarData.puntuacion} 
+                                    onChange={e => setLugarData('puntuacion', e.target.value)} 
+                                    className="w-full bg-gray-700 border-none rounded-lg text-white mb-3 p-3"
+                                >
+                                    <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                                    <option value="4">⭐⭐⭐⭐ (4)</option>
+                                    <option value="3">⭐⭐⭐ (3)</option>
+                                    <option value="2">⭐⭐ (2)</option>
+                                    <option value="1">⭐ (1)</option>
                                 </select>
-                                <textarea placeholder="Comentario..." value={lugarData.comentario} onChange={e => setLugarData('comentario', e.target.value)} className={`w-full bg-gray-700 border-none rounded-lg text-white text-sm h-20 ${errorsLugar.comentario ? 'ring-2 ring-red-500' : ''}`}></textarea>
-                                {errorsLugar.comentario && <span className="text-red-400 text-xs mt-1">{errorsLugar.comentario}</span>}
+                                <textarea placeholder="Comentario..." value={lugarData.comentario} onChange={e => setLugarData('comentario', e.target.value)} className="w-full bg-gray-700 border-none rounded-lg text-white text-sm h-20 p-3"></textarea>
                             </div>
 
-                            <div className="flex flex-col">
-                                <input type="text" placeholder="URL Imagen" value={lugarData.imagen} onChange={e => setLugarData('imagen', e.target.value)} 
-                                    className={`w-full bg-gray-800 border-gray-700 rounded-lg text-white text-sm ${errorsLugar.imagen ? 'ring-2 ring-red-500' : ''}`} />
-                                {errorsLugar.imagen && <span className="text-red-400 text-xs mt-1">{errorsLugar.imagen}</span>}
-                            </div>
+                            <input type="text" placeholder="URL Imagen" value={lugarData.imagen} onChange={e => setLugarData('imagen', e.target.value)} 
+                                className="w-full bg-gray-800 border-gray-700 rounded-lg text-white text-sm p-3" />
 
-                            <button type="submit" disabled={processingLugar} className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-lg">
-                                {processingLugar ? 'GUARDANDO...' : 'GUARDAR AHORA'}
+                            <button type="submit" disabled={processingLugar} className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl shadow-lg transition-all active:scale-95 uppercase">
+                                {processingLugar ? 'GUARDANDO...' : 'GUARDAR EN RAME'}
                             </button>
                         </form>
                     </div>
