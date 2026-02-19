@@ -20,4 +20,9 @@ class ValoracionLugar extends Model
     {
         return $this->belongsTo(Lugar::class, 'lugares_id');
     }
+    public function user()
+{
+    // Esto le dice: "Busca en la tabla users al dueño de esta valoración"
+    return $this->belongsTo(User::class);
+}
 }

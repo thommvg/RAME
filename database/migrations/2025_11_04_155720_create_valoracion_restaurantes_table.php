@@ -12,12 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('valoracion_restaurantes', function (Blueprint $table) {
+            // Se cambió 'Restaurantes' por 'restaurantes' (en minúsculas)
             $table->foreignId('restaurante_id')
-                  ->constrained('Restaurantes')
+                  ->constrained('restaurantes') 
                   ->onDelete('cascade');
 
             $table->integer('puntuacion');
             $table->text('comentario')->nullable();
+            $table->timestamps(); // Es recomendable agregar timestamps
         });
     }
 

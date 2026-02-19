@@ -17,4 +17,9 @@ class ValoracionRestaurante extends Model
 
     // 2. ESTO ES LO QUE ARREGLA EL ERROR ACTUAL
     public $timestamps = false; 
+    public function user()
+{
+    // Esto le dice: "Busca en la tabla users al dueño de esta valoración"
+    return $this->belongsTo(User::class);
+}
 }

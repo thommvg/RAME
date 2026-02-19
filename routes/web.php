@@ -8,6 +8,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth; // 👈 IMPORTANTE para el logout
 use Inertia\Inertia;
+use App\Http\Controllers\ValoracionController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -21,6 +22,7 @@ Route::get('/', function () {
 // Rutas de envío de datos
 Route::post('/dashboard/store', [DashboardController::class, 'store'])->name('dashboard.store');
 Route::post('/contactos', [ContactoController::class, 'store'])->name('contactos.store');
+Route::post('/valoraciones', [ValoracionController::class, 'store'])->name('valoraciones.store');
 
 // Rutas de navegación
 Route::get('/explorar', [SearchController::class, 'index'])->name('explorar');

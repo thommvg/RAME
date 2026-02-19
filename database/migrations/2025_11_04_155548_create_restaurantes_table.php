@@ -18,7 +18,7 @@ return new class extends Migration
         $table->string('direccion');
         $table->unsignedBigInteger('tipo_de_comida_id');
         $table->string('ciudad', 100)->nullable();
-        $table->string('imagen')->nullable();
+        $table->LONGTEXT('imagen')->nullable();
         $table->timestamps();
 });
     }
