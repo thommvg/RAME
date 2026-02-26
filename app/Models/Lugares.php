@@ -14,7 +14,9 @@ class lugar extends Model
         'direccion',
         'tipo_de_turismo_id',
         'ciudad',
-        'imagen'
+        'imagen',
+        'lat',
+        'lng'
     ];
 
     // Relación con valoraciones

@@ -16,7 +16,9 @@ class Lugar extends Model
         'direccion',
         'tipo_de_turismo_id',
         'ciudad',
-        'imagen'
+        'imagen',
+        'lat',
+        'lng'
     ];
 
     // --- AÑADE ESTO (CRÍTICO) ---

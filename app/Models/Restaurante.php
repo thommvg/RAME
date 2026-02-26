@@ -15,7 +15,9 @@ class Restaurante extends Model
         'direccion',
         'ciudad',
         // ESTA ES LA LÍNEA QUE TE FALTA PARA QUE FUNCIONE:
-        'tipo_de_comida_id' 
+        'tipo_de_comida_id',
+        'lat',
+        'lng'
     ];
 
     // Esto está perfecto, evita errores si tu tabla no tiene created_at/updated_at

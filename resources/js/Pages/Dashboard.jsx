@@ -1,6 +1,8 @@
+import "leaflet/dist/leaflet.css";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, usePage, Link } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
+import Mapa from "@/Components/Mapa";
 
 // --- 1. COMPONENTE HERO ---
 function HeroHeader() {
@@ -55,7 +57,7 @@ const PlaceCard = ({ name, rating, imageUrl }) => {
 };
 
 // --- 3. DASHBOARD PRINCIPAL ---
-export default function Dashboard({ auth, lugares, restaurantes }) {
+export default function Dashboard({ auth, lugares, restaurantes, lugaresMapa }) {
     const { flash } = usePage().props; 
     const [isModalOpen, setIsModalOpen] = useState(false); // Modal Registro
     const [selectedItem, setSelectedItem] = useState(null); // Modal Detalle
@@ -161,6 +163,23 @@ export default function Dashboard({ auth, lugares, restaurantes }) {
                     </div>
                 </div>
             </div>
+
+            {/* SECCIÓN: MAPA */}
+                <div className="bg-gray-900 py-16 border-t border-purple-800">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {/* Título */}
+                <h3 className="text-3xl font-extrabold text-white text-center mb-10">
+                    Ubicación de los lugares
+                </h3>
+
+            {/* Contenedor del mapa */}
+                    <div className="relative z-0 w-full h-[500px] rounded-xl overflow-hidden shadow-2xl border-4 border-purple-700">
+                        <Mapa lugares={lugaresMapa} />
+                    </div>
+
+            </div>
+        </div>
 
             {/* SECCIÓN CONTACTO */}
             <div className="bg-gray-900 py-16 border-t border-purple-800">

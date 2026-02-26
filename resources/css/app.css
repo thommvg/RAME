@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.leaflet-container {
+
+    border-radius: 12px;
+
+}
+
+.leaflet-popup-content-wrapper {
+
+    border-radius: 10px;
+
+}
+
+.leaflet-marker-icon {
+
+    transition: transform 0.2s ease;
+
+}
+
+.leaflet-marker-icon:hover {
+
+    transform: scale(1.15);
+
+}
