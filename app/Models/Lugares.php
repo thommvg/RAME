@@ -23,7 +23,12 @@ class lugar extends Model
     public function valoraciones()
     {
         // Asegúrate que la FK en valoraciones es 'turismo_id'
-        return $this->hasMany(ValoracionLugar::class, ' lugares_id');
+        return $this->hasMany(ValoracionLugar::class, 'lugares_id');
+    }
+
+    public function tipoDeTurismo()
+    {
+        return $this->belongsTo(Tipo_de_turismo::class, 'tipo_de_turismo_id');
     }
 
 

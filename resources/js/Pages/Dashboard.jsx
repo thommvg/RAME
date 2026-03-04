@@ -1,3 +1,4 @@
+import Footer from "@/Components/Footer";
 import "leaflet/dist/leaflet.css";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, usePage, Link } from '@inertiajs/react';
@@ -338,8 +339,9 @@ export default function Dashboard({ auth, lugares, restaurantes, lugaresMapa }) 
                             </button>
                         </form>
                     </div>
-                </div>
+                </div> 
             )}
+        <Footer />
         </AuthenticatedLayout>
     );
 }

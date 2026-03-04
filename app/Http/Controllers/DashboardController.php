@@ -28,10 +28,26 @@ class DashboardController extends Controller
             ->take(3)
             ->get();
 
-        // 🔥 Lugares con coordenadas válidas (para el mapa)
+        // 🔥 Lugares con coordenadas válidas
         $lugaresMapa = Lugar::whereNotNull('lat')
             ->whereNotNull('lng')
-            ->get();
+            ->get()
+            ->map(function ($lugar) {
+                $lugar->tipo_entidad = 'lugar';
+                return $lugar;
+            });
+
+        // 🔥 Restaurantes con coordenadas válidas
+        $restaurantesMapa = Restaurante::whereNotNull('lat')
+            ->whereNotNull('lng')
+            ->get()
+            ->map(function ($restaurante) {
+                $restaurante->tipo_entidad = 'restaurante';
+                return $restaurante;
+            });
+
+        // 🔥 Unimos todo
+        $lugaresMapa = $lugaresMapa->concat($restaurantesMapa)->values();
 
         return Inertia::render('Dashboard', [
             'lugares' => $lugares,
@@ -111,6 +127,8 @@ class DashboardController extends Controller
                 'descripcion' => $request->comentario,
                 'imagen' => $request->imagen,
                 'tipo_de_comida_id' => $request->tipo_de_comida_id ?? 1,
+                'lat' => $latitud,
+                'lng' => $longitud,
             ]);
 
             ValoracionRestaurante::create([

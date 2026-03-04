@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Log; // Para que \Log no marque error
+
+// 👇 ESTAS DOS LÍNEAS SON CLAVE PARA EL CORREO
+use App\Mail\BienvenidaUsuarioMail;
+use Illuminate\Support\Facades\Mail;
 
 class RegisteredUserController extends Controller
 {
@@ -57,6 +63,15 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // 📧 MANDAMOS EL CORREO ANTES DE CERRAR SESIÓN
+        try {
+            Mail::to($user->email)->send(new BienvenidaUsuarioMail($user));
+        } catch (\Exception $e) {
+            // Si hay un error, lo guarda en storage/logs/laravel.log
+            \Log::error("Error enviando correo de bienvenida: " . $e->getMessage());
+        }
+
+        // 🔒 MANTENEMOS TU LÓGICA DE CIERRE DE SESIÓN
         auth()->logout();
         session()->invalidate();
         session()->regenerateToken();

@@ -25,11 +25,11 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                         
                         {/* COLUMNA IZQUIERDA: Logo y mensaje */}
                         <div className="lg:w-1/2 mb-12 lg:mb-0 text-center lg:text-left">
-                            <h1 className="text-6xl font-bold text-withe mb-4">
+                            <h1 className="text-8xl font-bold text-black mb-6">
                                 RAME
                             </h1>
-                            <p className="text-2xl text-black fond- bold mb-10">
-                                Conoce luagres increibles atraves del Valle de aburra.
+                            <p className="text-4xl text-black font-bold mb-10">
+                                Conoce lugares increibles atraves del Valle de aburra.
                             </p>
                         </div>
 
